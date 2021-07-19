@@ -3,14 +3,35 @@ import ponyData from "../data/ponies.json";
 import { seasonOneEpisodes } from "./episodes";
 import { pickRandom } from "./random";
 
+interface PonyShape {
+  name: string;
+  species: string;
+  color: string;
+  voice: string;
+  element: string;
+  cutie_mark: string;
+}
+
 const app = express();
 const serverStartDate = new Date();
 let serverHitCount = 0;
+let history: string[] = [];
 
 app.get("/", (req, res) => {
   res.send(
     "This is the default path - and it isn't very interesting, sorry. \nTry visiting localhost:4000/creation-time, localhost:4000/current-time"
   );
+  history.push("/");
+});
+
+app.get("/hello-world", (req, res) => {
+  res.send({
+    english: "Hello world!",
+    esperanto: "Saluton mondo!",
+    hawaiian: "Aloha Honua",
+    turkish: "Merhaba Dünya!",
+  });
+  history.push("/hello-world");
 });
 
 app.get("/creation-time", (req, res) => {
@@ -19,6 +40,7 @@ app.get("/creation-time", (req, res) => {
     utc: serverStartDate.toUTCString(),
     countedAsHit: false,
   });
+  history.push("/creation-time");
 });
 
 app.get("/current-time", (req, res) => {
@@ -29,6 +51,7 @@ app.get("/current-time", (req, res) => {
     utc: dateOfRequestHandling.toUTCString(),
     countedAsHit: false,
   });
+  history.push("/current-time");
 });
 
 app.get("/hits", (req, res) => {
@@ -38,6 +61,7 @@ app.get("/hits", (req, res) => {
     currentTotal: serverHitCount,
     countedAsHit: true,
   });
+  history.push("/hits");
 });
 
 app.get("/hits-stealth", (req, res) => {
@@ -46,6 +70,7 @@ app.get("/hits-stealth", (req, res) => {
     currentTotal: serverHitCount,
     countedAsHit: false,
   });
+  history.push("/hits-stealth");
 });
 
 app.get("/ponies", (req, res) => {
@@ -54,6 +79,7 @@ app.get("/ponies", (req, res) => {
     data: ponyData,
     countedAsHit: false,
   });
+  history.push("/ponies");
 });
 
 app.get("/season-one", (req, res) => {
@@ -61,6 +87,7 @@ app.get("/season-one", (req, res) => {
     countedAsHit: false,
     data: seasonOneEpisodes,
   });
+  history.push("/season-one");
 });
 
 app.get("/season-one/random", (req, res) => {
@@ -68,6 +95,24 @@ app.get("/season-one/random", (req, res) => {
   res.json({
     countedAsHit: false,
     data: randomEpisode,
+  });
+  history.push("/season-one/random");
+});
+
+app.get("/ponies-random", (req, res) => {
+  serverHitCount += 1;
+  const randomPony = pickRandom(ponyData.members);
+  res.json({
+    currentTotal: serverHitCount,
+    countedAsHit: true,
+    data: randomPony,
+  });
+  history.push("/ponies-random");
+});
+
+app.get("/history", (req, res) => {
+  res.json({
+    routes: history,
   });
 });
 
